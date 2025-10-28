@@ -17,7 +17,11 @@ class LinkFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'title' => fake()->sentence(),
+            'url' => fake()->url(),
+            'description' => fake()->paragraph(),
+            'is_private' => fake()->boolean(),
+            'is_active' => fake()->boolean(),
         ];
     }
 }
