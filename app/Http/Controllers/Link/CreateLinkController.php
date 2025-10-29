@@ -3,16 +3,15 @@
 namespace App\Http\Controllers\Link;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Link\CreateLinkRequest;
 use App\Models\Link;
-use Illuminate\Http\Request;
 
 class CreateLinkController extends Controller
 {
-    public function __invoke(Request $request)
+    public function __invoke(CreateLinkRequest $request)
     {
+        Link::create($request->validated());
 
-        Link::create(array_merge($request->all(), ['user_id' => $request->user()->id]));
-
-        return redirect()->back();
+        return redirect()->back()->with('success', 'Link created successfully.');
     }
 }
