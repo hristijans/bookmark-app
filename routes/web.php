@@ -17,6 +17,9 @@ Route::get('dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
+    Route::get('links', \App\Http\Controllers\Link\IndexLinkController::class)
+        ->name('links.index');
+
     Route::post('links', CreateLinkController::class)
         ->name('links.create');
 

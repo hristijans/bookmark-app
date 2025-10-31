@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Link;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Link\CreateLinkRequest;
 use App\Http\Requests\Link\UpdateLinkRequest;
 use App\Models\Link;
 
