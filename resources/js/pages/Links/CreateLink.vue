@@ -1,6 +1,13 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button';
 import {
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import {
     Sheet,
     SheetContent,
     SheetDescription,
@@ -8,25 +15,10 @@ import {
     SheetTitle,
     SheetTrigger,
 } from '@/components/ui/sheet';
-import { toast } from 'vue-sonner';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import {
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from '@/components/ui/form';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
 import { useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
+import { toast } from 'vue-sonner';
 
 const modalOpened = ref(false);
 
@@ -85,7 +77,7 @@ const onSubmit = () => {
         <SheetTrigger as-child>
             <Button variant="outline"> Add New Link </Button>
         </SheetTrigger>
-        <SheetContent side="right" class="w-full sm:max-w-md overflow-y-auto">
+        <SheetContent side="right" class="w-full overflow-y-auto sm:max-w-md">
             <SheetHeader>
                 <SheetTitle>Add New Link</SheetTitle>
                 <SheetDescription>
@@ -93,7 +85,7 @@ const onSubmit = () => {
                 </SheetDescription>
             </SheetHeader>
 
-            <form class="space-y-6 mt-8 px-4" @submit.prevent="onSubmit">
+            <form class="mt-8 space-y-6 px-4" @submit.prevent="onSubmit">
                 <FormField v-slot="{ componentField }" name="url">
                     <FormItem>
                         <FormLabel>URL</FormLabel>
@@ -105,7 +97,10 @@ const onSubmit = () => {
                                 :disabled="form.processing"
                             />
                         </FormControl>
-                        <p v-if="form.errors.url" class="text-sm font-medium text-destructive">
+                        <p
+                            v-if="form.errors.url"
+                            class="text-sm font-medium text-destructive"
+                        >
                             {{ form.errors.url }}
                         </p>
                     </FormItem>
@@ -122,7 +117,10 @@ const onSubmit = () => {
                                 :disabled="form.processing"
                             />
                         </FormControl>
-                        <p v-if="form.errors.title" class="text-sm font-medium text-destructive">
+                        <p
+                            v-if="form.errors.title"
+                            class="text-sm font-medium text-destructive"
+                        >
                             {{ form.errors.title }}
                         </p>
                     </FormItem>
@@ -140,7 +138,10 @@ const onSubmit = () => {
                                 class="resize-none"
                             />
                         </FormControl>
-                        <p v-if="form.errors.description" class="text-sm font-medium text-destructive">
+                        <p
+                            v-if="form.errors.description"
+                            class="text-sm font-medium text-destructive"
+                        >
                             {{ form.errors.description }}
                         </p>
                     </FormItem>
@@ -156,7 +157,11 @@ const onSubmit = () => {
                                         v-for="tag in availableTags"
                                         :key="tag"
                                         type="button"
-                                        :variant="form.tags.includes(tag) ? 'default' : 'outline'"
+                                        :variant="
+                                            form.tags.includes(tag)
+                                                ? 'default'
+                                                : 'outline'
+                                        "
                                         size="sm"
                                         @click="toggleTag(tag)"
                                         :disabled="form.processing"
@@ -165,12 +170,18 @@ const onSubmit = () => {
                                         {{ tag }}
                                     </Button>
                                 </div>
-                                <p v-if="form.tags.length > 0" class="text-xs text-muted-foreground">
+                                <p
+                                    v-if="form.tags.length > 0"
+                                    class="text-xs text-muted-foreground"
+                                >
                                     {{ form.tags.length }} tag(s) selected
                                 </p>
                             </div>
                         </FormControl>
-                        <p v-if="form.errors.tags" class="text-sm font-medium text-destructive">
+                        <p
+                            v-if="form.errors.tags"
+                            class="text-sm font-medium text-destructive"
+                        >
                             {{ form.errors.tags }}
                         </p>
                     </FormItem>

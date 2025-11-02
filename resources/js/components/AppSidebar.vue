@@ -27,7 +27,7 @@ const mainNavItems: NavItem[] = [
         title: 'Links',
         href: 'links',
         icon: Folder,
-    }
+    },
 ];
 
 const footerNavItems: NavItem[] = [

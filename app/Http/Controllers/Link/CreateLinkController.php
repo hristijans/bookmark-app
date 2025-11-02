@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers\Link;
 
+use App\Actions\Links\CreateLink;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Link\CreateLinkRequest;
-use App\Models\Link;
 
 class CreateLinkController extends Controller
 {
-    public function __invoke(CreateLinkRequest $request)
+    public function __invoke(CreateLinkRequest $request, CreateLink $createLink)
     {
-        Link::create($request->validated());
+        $createLink->execute($request->validated());
 
         return redirect()->back()->with('success', 'Link created successfully.');
     }

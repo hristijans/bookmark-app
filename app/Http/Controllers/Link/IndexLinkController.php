@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers\Link;
 
+use App\Actions\Links\SearchLink;
 use App\Http\Controllers\Controller;
-use App\Models\Link;
+use App\Http\Requests\Link\SearchLinkRequest;
 use Inertia\Inertia;
 
 class IndexLinkController extends Controller
 {
-    public function __invoke()
+    public function __invoke(SearchLinkRequest $request, SearchLink $searchLink)
     {
-        $links = Link::latest()->paginate(10)->withQueryString();
+        $links = $searchLink->execute($request->validated());
 
         return Inertia::render('Links/Index', [
             'links' => $links,

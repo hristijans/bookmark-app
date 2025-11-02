@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import Breadcrumbs from '@/components/Breadcrumbs.vue';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import CreateLink from '@/pages/Links/Create/CreateLink.vue';
 import type { BreadcrumbItemType } from '@/types';
 
 withDefaults(
@@ -25,9 +24,6 @@ withDefaults(
                     <template v-if="breadcrumbs && breadcrumbs.length > 0">
                         <Breadcrumbs :breadcrumbs="breadcrumbs" />
                     </template>
-                </div>
-                <div>
-                    <CreateLink />
                 </div>
             </div>
         </div>
