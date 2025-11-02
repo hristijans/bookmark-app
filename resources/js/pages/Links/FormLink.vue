@@ -8,11 +8,16 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import Tags from '@/pages/Tags/Tags.vue';
 
 const props = defineProps({
     form: {
         type: Object,
         required: true,
+    },
+    availableTags: {
+        type: Array,
+        default: () => [],
     },
     submitLabel: {
         type: String,
@@ -24,34 +29,11 @@ const props = defineProps({
     },
 });
 
-const emit = defineEmits(['submit', 'cancel']);
-
-const availableTags = [
-    'JavaScript',
-    'Vue.js',
-    'React',
-    'TypeScript',
-    'CSS',
-    'HTML',
-    'Node.js',
-    'Python',
-    'Design',
-    'Tutorial',
-];
-
-const toggleTag = (tag: string) => {
-    const index = props.form.tags.indexOf(tag);
-    if (index > -1) {
-        props.form.tags.splice(index, 1);
-    } else {
-        props.form.tags.push(tag);
-    }
-};
+const emit = defineEmits(['submit']);
 
 const onSubmit = () => {
     emit('submit');
 };
-
 </script>
 
 <template>
@@ -121,32 +103,11 @@ const onSubmit = () => {
             <FormItem>
                 <FormLabel>Tags</FormLabel>
                 <FormControl>
-                    <div class="space-y-3">
-                        <div class="flex flex-wrap gap-2">
-                            <Button
-                                v-for="tag in availableTags"
-                                :key="tag"
-                                type="button"
-                                :variant="
-                                    form.tags.includes(tag)
-                                        ? 'default'
-                                        : 'outline'
-                                "
-                                size="sm"
-                                @click="toggleTag(tag)"
-                                :disabled="form.processing"
-                                class="text-xs"
-                            >
-                                {{ tag }}
-                            </Button>
-                        </div>
-                        <p
-                            v-if="form.tags.length > 0"
-                            class="text-xs text-muted-foreground"
-                        >
-                            {{ form.tags.length }} tag(s) selected
-                        </p>
-                    </div>
+                    <Tags
+                        v-model="form.tags"
+                        :available-tags="availableTags"
+                        :disabled="form.processing"
+                    />
                 </FormControl>
                 <p
                     v-if="form.errors.tags"
@@ -165,13 +126,6 @@ const onSubmit = () => {
             >
                 {{ form.processing ? processingLabel : submitLabel }}
             </Button>
-<!--            <Button-->
-<!--                type="button"-->
-<!--                variant="outline"-->
-<!--                :disabled="form.processing"-->
-<!--            >-->
-<!--                Cancel-->
-<!--            </Button>-->
         </div>
     </form>
 </template>
