@@ -29,6 +29,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('redirect/{link}', RedirectLinkController::class)
         ->name('links.redirect');
+
+    Route::get('tags', \App\Http\Controllers\Tag\SearchTagsController::class)
+        ->name('tags.index');
 });
 
 require __DIR__.'/settings.php';

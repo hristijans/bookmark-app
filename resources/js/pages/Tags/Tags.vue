@@ -5,6 +5,7 @@ import { Plus } from 'lucide-vue-next';
 import { ref, computed, nextTick } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { toast } from 'vue-sonner';
+import { onMounted }  from 'vue';
 
 const props = defineProps({
     modelValue: {
@@ -27,11 +28,23 @@ const newTagName = ref('');
 const isAddingTag = ref(false);
 const isCreatingTag = ref(false);
 const newTagInput = ref(null);
+const allTags = ref(null);
 
 const selectedTags = computed({
     get: () => props.modelValue,
     set: (value) => emit('update:modelValue', value),
 });
+
+const getTags = () => {
+    router.get('/tags', {}, {
+        preserveScroll: true,
+        preserveState: true,
+        onSuccess: (response) => {
+            allTags.value = response.data;
+        }
+    })
+
+}
 
 const toggleTag = (tag: string) => {
     const index = selectedTags.value.indexOf(tag);
@@ -54,6 +67,10 @@ const hideAddTagInput = () => {
     isAddingTag.value = false;
     newTagName.value = '';
 };
+
+onMounted(() => {
+    getTags();
+})
 
 const createNewTag = () => {
     const trimmedTag = newTagName.value.trim();
@@ -114,6 +131,7 @@ const handleKeydown = (event: KeyboardEvent) => {
     <div class="space-y-3">
         <div class="flex flex-wrap gap-2">
             <!-- Existing tags -->
+            <pre>{{ allTags }}</pre>
             <Button
                 v-for="tag in availableTags"
                 :key="tag"
