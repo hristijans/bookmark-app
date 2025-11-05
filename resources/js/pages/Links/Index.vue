@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import AppLayout from '@/layouts/AppLayout.vue';
 import CreateLink from '@/pages/Links/CreateLink.vue';
 import EditLink from '@/pages/Links/EditLink.vue';
@@ -39,6 +40,17 @@ const getDomain = (url) => {
     } catch {
         return url;
     }
+};
+
+// Spatie\Tags stores names per locale; extract a sensible string label
+const tagLabel = (tag: any): string => {
+    const name = tag?.name;
+    if (name && typeof name === 'object') {
+        const firstKey = Object.keys(name)[0];
+        const value = (firstKey ? name[firstKey] : undefined);
+        return typeof value === 'string' ? value : '';
+    }
+    return typeof name === 'string' ? name : '';
 };
 </script>
 
@@ -117,12 +129,25 @@ const getDomain = (url) => {
                                 <div
                                     class="flex items-start justify-between gap-2"
                                 >
-                                    <CardTitle
-                                        class="line-clamp-2 cursor-pointer text-base leading-tight hover:underline"
-                                        @click="openLink(link.id)"
-                                    >
-                                        {{ link.title }}
-                                    </CardTitle>
+                                    <div class="min-w-0 flex-1">
+                                        <CardTitle
+                                            class="line-clamp-2 cursor-pointer text-base leading-tight hover:underline"
+                                            @click="openLink(link.id)"
+                                        >
+                                            {{ link.title }}
+                                        </CardTitle>
+                                        <!-- Tags under the title -->
+                                        <div v-if="link.tags && link.tags.length" class="mt-2 flex flex-wrap gap-2">
+                                            <Badge
+                                                v-for="tag in link.tags"
+                                                :key="tag.id ?? tag.slug ?? tagLabel(tag)"
+                                                variant="secondary"
+                                                class="px-2 py-0.5 text-xs"
+                                            >
+                                                {{ tagLabel(tag) }}
+                                            </Badge>
+                                        </div>
+                                    </div>
                                     <Button
                                         variant="ghost"
                                         size="icon"
