@@ -30,8 +30,15 @@ Route::middleware('auth')->group(function () {
     Route::get('redirect/{link}', RedirectLinkController::class)
         ->name('links.redirect');
 
-    Route::get('tags', \App\Http\Controllers\Tag\SearchTagsController::class)
+    // Tags management
+    Route::get('tags', \App\Http\Controllers\Tag\IndexTagController::class)
         ->name('tags.index');
+    Route::post('tags', \App\Http\Controllers\Tag\StoreTagController::class)
+        ->name('tags.store');
+    Route::put('tags/{tag}', \App\Http\Controllers\Tag\UpdateTagController::class)
+        ->name('tags.update');
+    Route::delete('tags/{tag}', \App\Http\Controllers\Tag\DestroyTagController::class)
+        ->name('tags.destroy');
 });
 
 require __DIR__.'/settings.php';

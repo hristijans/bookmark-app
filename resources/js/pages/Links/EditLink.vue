@@ -22,6 +22,10 @@ import FormLink from '@/pages/Links/FormLink.vue';
 
 const props = defineProps({
     link: Object,
+    availableTags: {
+        type: Array,
+        default: () => [],
+    },
 });
 
 const modalOpened = ref(false);
@@ -39,7 +43,9 @@ const open = (link) => {
     form.url = link.url || '';
     form.title = link.title || '';
     form.description = link.description || '';
-    form.tags = link.tags || [];
+    // Map existing tag objects to their display names
+    const toName = (t) => (t?.name?.en ?? t?.name ?? t?.slug ?? '').toString();
+    form.tags = Array.isArray(link.tags) ? link.tags.map(toName).filter(Boolean) : [];
     modalOpened.value = true;
 };
 
@@ -100,6 +106,7 @@ const onSubmit = () => {
 
             <FormLink
                 :form="form"
+                :available-tags="props.availableTags"
                 submit-label="Submit"
                 processing-label="Submitting..."
                 @submit="onSubmit"

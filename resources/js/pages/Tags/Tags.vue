@@ -2,18 +2,17 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus } from 'lucide-vue-next';
-import { ref, computed, nextTick } from 'vue';
+import { ref, computed, nextTick, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { toast } from 'vue-sonner';
-import { onMounted }  from 'vue';
 
 const props = defineProps({
     modelValue: {
-        type: Array,
+        type: Array as () => string[],
         default: () => [],
     },
     availableTags: {
-        type: Array,
+        type: Array as () => string[],
         default: () => [],
     },
     disabled: {
@@ -22,29 +21,26 @@ const props = defineProps({
     },
 });
 
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits(['update:modelValue', 'created']);
 
 const newTagName = ref('');
 const isAddingTag = ref(false);
 const isCreatingTag = ref(false);
-const newTagInput = ref(null);
-const allTags = ref(null);
+const newTagInput = ref<HTMLInputElement | null>(null);
 
-const selectedTags = computed({
+const localAvailableTags = ref<string[]>([...props.availableTags]);
+watch(
+    () => props.availableTags,
+    (val) => {
+        localAvailableTags.value = [...val];
+    },
+    { deep: true }
+);
+
+const selectedTags = computed<string[]>({
     get: () => props.modelValue,
     set: (value) => emit('update:modelValue', value),
 });
-
-const getTags = () => {
-    router.get('/tags', {}, {
-        preserveScroll: true,
-        preserveState: true,
-        onSuccess: (response) => {
-            allTags.value = response.data;
-        }
-    })
-
-}
 
 const toggleTag = (tag: string) => {
     const index = selectedTags.value.indexOf(tag);
@@ -68,10 +64,6 @@ const hideAddTagInput = () => {
     newTagName.value = '';
 };
 
-onMounted(() => {
-    getTags();
-})
-
 const createNewTag = () => {
     const trimmedTag = newTagName.value.trim();
 
@@ -80,7 +72,7 @@ const createNewTag = () => {
     }
 
     // Check if tag already exists
-    if (props.availableTags.includes(trimmedTag)) {
+    if (localAvailableTags.value.includes(trimmedTag)) {
         // If it exists, just select it
         if (!selectedTags.value.includes(trimmedTag)) {
             toggleTag(trimmedTag);
@@ -98,8 +90,11 @@ const createNewTag = () => {
         preserveScroll: true,
         preserveState: true,
         onSuccess: () => {
-            // Add to selected tags
+            // Add to available and selected tags locally
+            localAvailableTags.value = [...localAvailableTags.value, trimmedTag];
             selectedTags.value = [...selectedTags.value, trimmedTag];
+
+            emit('created', trimmedTag);
 
             toast('Tag created', {
                 description: `Tag "${trimmedTag}" has been created and selected.`,
@@ -108,9 +103,9 @@ const createNewTag = () => {
             hideAddTagInput();
             isCreatingTag.value = false;
         },
-        onError: (errors) => {
+        onError: (errors: Record<string, string>) => {
             toast.error('Failed to create tag', {
-                description: errors.name || 'An error occurred while creating the tag.',
+                description: errors?.name || 'An error occurred while creating the tag.',
             });
             isCreatingTag.value = false;
         },
@@ -131,9 +126,8 @@ const handleKeydown = (event: KeyboardEvent) => {
     <div class="space-y-3">
         <div class="flex flex-wrap gap-2">
             <!-- Existing tags -->
-            <pre>{{ allTags }}</pre>
             <Button
-                v-for="tag in availableTags"
+                v-for="tag in localAvailableTags"
                 :key="tag"
                 type="button"
                 :variant="selectedTags.includes(tag) ? 'default' : 'outline'"

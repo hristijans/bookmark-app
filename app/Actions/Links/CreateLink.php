@@ -16,7 +16,9 @@ class CreateLink
             'description' => $data['description'],
         ]);
 
-        $link->tags()->attach($data['tags']);
+        // Sync tags by name using Spatie HasTags. If none provided, ensure no tags are attached.
+        $tags = $data['tags'] ?? [];
+        $link->syncTags($tags);
 
         LinkCreated::dispatch($link);
     }

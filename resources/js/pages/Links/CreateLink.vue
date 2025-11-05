@@ -30,18 +30,12 @@ const form = useForm({
     tags: [],
 });
 
-const availableTags = [
-    'JavaScript',
-    'Vue.js',
-    'React',
-    'TypeScript',
-    'CSS',
-    'HTML',
-    'Node.js',
-    'Python',
-    'Design',
-    'Tutorial',
-];
+const props = defineProps({
+    availableTags: {
+        type: Array,
+        default: () => [],
+    },
+});
 
 const toggleTag = (tag: string) => {
     const index = form.tags.indexOf(tag);
@@ -88,6 +82,7 @@ const onSubmit = () => {
 
             <FormLink
                 :form="form"
+                :available-tags="props.availableTags"
                 submit-label="Submit"
                 processing-label="Submitting..."
                 @submit="onSubmit"

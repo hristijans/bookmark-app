@@ -7,7 +7,7 @@ use App\Models\Link;
 
 class UpdateLink
 {
-    public function execute(Link $link, array $data)
+    public function execute(Link $link, array $data): void
     {
         $link->fill([
             'title' => $data['title'],
@@ -17,7 +17,9 @@ class UpdateLink
 
         $link->refresh();
 
-        $link->tags()->sync($data['tags']);
+        // Sync tags by name using Spatie HasTags
+        $tags = $data['tags'] ?? [];
+        $link->syncTags($tags);
 
         LinkUpdated::dispatch($link);
     }

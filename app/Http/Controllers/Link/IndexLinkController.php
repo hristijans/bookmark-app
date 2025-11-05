@@ -14,8 +14,17 @@ class IndexLinkController extends Controller
     {
         $links = $searchLink->execute($request->validated());
 
+        $tagNames = Tag::query()->get()->pluck('name')->map(function ($name) {
+            if (is_array($name)) {
+                $first = reset($name);
+                return is_string($first) ? $first : '';
+            }
+            return (string) $name;
+        })->filter()->sort()->values()->all();
+
         return Inertia::render('Links/Index', [
             'links' => $links,
+            'availableTags' => $tagNames,
         ]);
     }
 }

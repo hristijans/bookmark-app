@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class CreateLinkRequest extends FormRequest
 {
-    public function prepareForValidation()
+    public function prepareForValidation(): void
     {
         $this->merge(['user_id' => auth()->id()]);
     }
@@ -32,6 +32,7 @@ class CreateLinkRequest extends FormRequest
             'title' => 'required',
             'description' => 'required',
             'tags' => 'sometimes|array',
+            'tags.*' => 'string|max:255',
         ];
     }
 }

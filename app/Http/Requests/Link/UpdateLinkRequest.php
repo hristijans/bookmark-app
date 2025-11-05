@@ -26,6 +26,7 @@ class UpdateLinkRequest extends FormRequest
             'title' => 'required',
             'description' => 'required',
             'tags' => 'sometimes|array',
+            'tags.*' => 'string|max:255',
         ];
     }
 }

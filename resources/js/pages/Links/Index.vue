@@ -19,6 +19,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 const props = defineProps({
     links: Object,
+    availableTags: Array,
 });
 
 const editLinkRef = ref(null);
@@ -65,8 +66,8 @@ const getDomain = (url) => {
                             </p>
                         </div>
                         <div>
-                            <CreateLink />
-                            <EditLink ref="editLinkRef" />
+                            <CreateLink :available-tags="availableTags" />
+                            <EditLink ref="editLinkRef" :available-tags="availableTags" />
                         </div>
                     </div>
                 </div>

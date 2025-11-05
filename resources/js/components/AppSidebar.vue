@@ -28,6 +28,11 @@ const mainNavItems: NavItem[] = [
         href: 'links',
         icon: Folder,
     },
+    {
+        title: 'Tags',
+        href: 'tags',
+        icon: Folder,
+    },
 ];
 
 const footerNavItems: NavItem[] = [
