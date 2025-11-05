@@ -22,6 +22,13 @@ class SearchLinkRequest extends FormRequest
     public function rules(): array
     {
         return [
+            // Backward compatibility: legacy single tag param
+            'tag' => ['nullable', 'string'],
+            // New multi-tag support: tags[] as array of strings
+            'tags' => ['sometimes', 'array'],
+            'tags.*' => ['string'],
+            // Pagination size selector
+            'per_page' => ['nullable', 'integer', 'in:10,20,50,100'],
         ];
     }
 }

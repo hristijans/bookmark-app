@@ -6,10 +6,11 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import CreateLink from '@/pages/Links/CreateLink.vue';
 import EditLink from '@/pages/Links/EditLink.vue';
 import { dashboard } from '@/routes';
+import { index as linksIndex } from '@/routes/links';
 import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
 import { ExternalLink, Link2, Pencil } from 'lucide-vue-next';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -21,7 +22,52 @@ const breadcrumbs: BreadcrumbItem[] = [
 const props = defineProps({
     links: Object,
     availableTags: Array,
+    // legacy single tag for backward compatibility
+    activeTag: { type: String, default: '' },
+    // new multi-tag + pagination props
+    activeTags: { type: Array as () => string[], default: () => [] },
+    perPage: { type: Number, default: 10 },
+    perPageOptions: { type: Array as () => number[], default: () => [10, 20, 50, 100] },
 });
+
+const activeTag = computed(() => props.activeTag || '');
+const activeTags = computed<string[]>(() => props.activeTags ?? []);
+
+function buildQuery(overrides: Record<string, any> = {}) {
+    const query: Record<string, any> = {
+        ...(activeTags.value.length ? { tags: activeTags.value } : {}),
+        per_page: props.perPage || 10,
+        ...overrides,
+    };
+    return query;
+}
+
+function applyTags(tags: string[]) {
+    // Reset to page 1 when filters change
+    const options: any = { mergeQuery: { ...buildQuery({ tags, page: 1 }) } };
+    router.get(linksIndex.url(options), {}, { preserveState: true, preserveScroll: true });
+}
+
+function toggleTag(tag: string) {
+    const label = String(tag);
+    const set = new Set(activeTags.value);
+    if (set.has(label)) {
+        set.delete(label);
+    } else {
+        set.add(label);
+    }
+    applyTags(Array.from(set));
+}
+
+function clearTags() {
+    const options: any = { mergeQuery: { per_page: props.perPage || 10, page: 1 } };
+    router.get(linksIndex.url(options), {}, { preserveState: true, preserveScroll: true });
+}
+
+function changePerPage(size: number) {
+    const options: any = { mergeQuery: { ...buildQuery({ per_page: size, page: 1 }) } };
+    router.get(linksIndex.url(options), {}, { preserveState: true, preserveScroll: true });
+}
 
 const editLinkRef = ref(null);
 
@@ -80,6 +126,42 @@ const tagLabel = (tag: any): string => {
                         <div>
                             <CreateLink :available-tags="availableTags" />
                             <EditLink ref="editLinkRef" :available-tags="availableTags" />
+                        </div>
+                    </div>
+
+                    <!-- Global Tags Filter (multi-select) + Per Page selector -->
+                    <div v-if="availableTags && availableTags.length" class="mt-4 flex flex-wrap items-center justify-between gap-4">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button
+                                type="button"
+                                class="rounded-full border px-3 py-1 text-xs font-medium transition-colors hover:bg-muted"
+                                :class="!activeTags.length ? 'bg-primary/10 text-primary border-primary/20' : 'border-sidebar-border/70 dark:border-sidebar-border'"
+                                @click="clearTags()"
+                            >
+                                All
+                            </button>
+                            <button
+                                v-for="t in availableTags"
+                                :key="t"
+                                type="button"
+                                class="rounded-full border px-3 py-1 text-xs font-medium transition-colors hover:bg-muted"
+                                :class="activeTags.includes(String(t)) ? 'bg-primary/10 text-primary border-primary/20' : 'border-sidebar-border/70 dark:border-sidebar-border'"
+                                @click="toggleTag(String(t))"
+                            >
+                                {{ t }}
+                            </button>
+                        </div>
+                        <!-- Per page dropdown in header -->
+                        <div class="ml-auto flex items-center gap-2 text-xs">
+                            <span class="text-muted-foreground">Show</span>
+                            <select
+                                class="rounded-md border bg-background px-2 py-1 text-xs"
+                                :value="perPage"
+                                @change="changePerPage(parseInt(($event.target as HTMLSelectElement).value))"
+                            >
+                                <option v-for="opt in perPageOptions" :key="opt" :value="opt">{{ opt }}</option>
+                            </select>
+                            <span class="text-muted-foreground">per page</span>
                         </div>
                     </div>
                 </div>
@@ -142,7 +224,8 @@ const tagLabel = (tag: any): string => {
                                                 v-for="tag in link.tags"
                                                 :key="tag.id ?? tag.slug ?? tagLabel(tag)"
                                                 variant="secondary"
-                                                class="px-2 py-0.5 text-xs"
+                                                class="px-2 py-0.5 text-xs cursor-pointer hover:opacity-80"
+                                                @click="toggleTag(tagLabel(tag))"
                                             >
                                                 {{ tagLabel(tag) }}
                                             </Badge>
@@ -190,6 +273,63 @@ const tagLabel = (tag: any): string => {
                             Start building your link collection by adding your
                             first link.
                         </p>
+                    </div>
+                </div>
+
+                <!-- Footer: Pagination controls -->
+                <div v-if="links && links.total > 0" class="border-t border-sidebar-border/70 px-6 py-4 dark:border-sidebar-border">
+                    <div class="flex flex-col items-center justify-between gap-3 sm:flex-row">
+                        <!-- Per page dropdown near pagination -->
+                        <div class="flex items-center gap-2 text-xs">
+                            <span class="text-muted-foreground">Show</span>
+                            <select
+                                class="rounded-md border bg-background px-2 py-1 text-xs"
+                                :value="perPage"
+                                @change="changePerPage(parseInt(($event.target as HTMLSelectElement).value))"
+                            >
+                                <option v-for="opt in perPageOptions" :key="opt" :value="opt">{{ opt }}</option>
+                            </select>
+                            <span class="text-muted-foreground">per page</span>
+                        </div>
+
+                        <!-- Pagination links -->
+                        <nav class="flex items-center gap-1" aria-label="Pagination">
+                            <template v-if="Array.isArray(links.links) && links.links.length">
+                                <button
+                                    v-for="l in links.links"
+                                    :key="l.label + String(l.url)"
+                                    type="button"
+                                    class="min-w-8 rounded border px-2 py-1 text-xs"
+                                    :class="[
+                                        l.active ? 'bg-primary/10 text-primary border-primary/20' : 'border-sidebar-border/70 dark:border-sidebar-border',
+                                        !l.url ? 'opacity-50 cursor-not-allowed' : 'hover:bg-muted'
+                                    ]"
+                                    :disabled="!l.url"
+                                    @click="l.url && router.get(l.url, {}, { preserveState: true, preserveScroll: true })"
+                                    v-html="l.label"
+                                />
+                            </template>
+                            <template v-else>
+                                <button
+                                    type="button"
+                                    class="rounded border px-3 py-1 text-xs"
+                                    :class="!links.prev_page_url ? 'opacity-50 cursor-not-allowed border-sidebar-border/70 dark:border-sidebar-border' : 'hover:bg-muted'"
+                                    :disabled="!links.prev_page_url"
+                                    @click="links.prev_page_url && router.get(links.prev_page_url, {}, { preserveState: true, preserveScroll: true })"
+                                >
+                                    Previous
+                                </button>
+                                <button
+                                    type="button"
+                                    class="rounded border px-3 py-1 text-xs"
+                                    :class="!links.next_page_url ? 'opacity-50 cursor-not-allowed border-sidebar-border/70 dark:border-sidebar-border' : 'hover:bg-muted'"
+                                    :disabled="!links.next_page_url"
+                                    @click="links.next_page_url && router.get(links.next_page_url, {}, { preserveState: true, preserveScroll: true })"
+                                >
+                                    Next
+                                </button>
+                            </template>
+                        </nav>
                     </div>
                 </div>
             </div>
