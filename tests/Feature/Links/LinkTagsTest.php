@@ -3,7 +3,6 @@
 use App\Models\Link;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Spatie\Tags\Tag;
 
 uses(RefreshDatabase::class);
 

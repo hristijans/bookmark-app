@@ -12,6 +12,8 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
+import { index as linksIndex } from '@/routes/links';
+import { index as tagsIndex } from '@/routes/tags';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
 import { BookOpen, Folder, LayoutGrid } from 'lucide-vue-next';
@@ -25,12 +27,12 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Links',
-        href: 'links',
+        href: linksIndex(),
         icon: Folder,
     },
     {
         title: 'Tags',
-        href: 'tags',
+        href: tagsIndex(),
         icon: Folder,
     },
 ];

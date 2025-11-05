@@ -17,8 +17,10 @@ class IndexLinkController extends Controller
         $tagNames = Tag::query()->get()->pluck('name')->map(function ($name) {
             if (is_array($name)) {
                 $first = reset($name);
+
                 return is_string($first) ? $first : '';
             }
+
             return (string) $name;
         })->filter()->sort()->values()->all();
 
