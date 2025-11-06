@@ -21,6 +21,9 @@ class UpdateLink
         $tags = $data['tags'] ?? [];
         $link->syncTags($tags);
 
+        // Update search index
+        $link->searchable();
+
         LinkUpdated::dispatch($link);
     }
 }

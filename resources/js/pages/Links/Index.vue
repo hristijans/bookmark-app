@@ -2,6 +2,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import AppLayout from '@/layouts/AppLayout.vue';
 import CreateLink from '@/pages/Links/CreateLink.vue';
 import EditLink from '@/pages/Links/EditLink.vue';
@@ -9,8 +10,8 @@ import { dashboard } from '@/routes';
 import { index as linksIndex } from '@/routes/links';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router } from '@inertiajs/vue3';
-import { ExternalLink, Link2, Pencil } from 'lucide-vue-next';
-import { ref, computed } from 'vue';
+import { ExternalLink, Link2, Pencil, X } from 'lucide-vue-next';
+import { ref, computed, watch } from 'vue';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -26,16 +27,28 @@ const props = defineProps({
     activeTag: { type: String, default: '' },
     // new multi-tag + pagination props
     activeTags: { type: Array as () => string[], default: () => [] },
+    q: { type: String, default: '' },
     perPage: { type: Number, default: 10 },
     perPageOptions: { type: Array as () => number[], default: () => [10, 20, 50, 100] },
 });
 
 const activeTag = computed(() => props.activeTag || '');
 const activeTags = computed<string[]>(() => props.activeTags ?? []);
+const searchQuery = ref<string>(props.q || '');
+
+watch(
+    () => props.q,
+    (val) => {
+        if ((val || '') !== searchQuery.value) {
+            searchQuery.value = val || '';
+        }
+    }
+);
 
 function buildQuery(overrides: Record<string, any> = {}) {
     const query: Record<string, any> = {
         ...(activeTags.value.length ? { tags: activeTags.value } : {}),
+        ...(searchQuery.value ? { q: searchQuery.value } : {}),
         per_page: props.perPage || 10,
         ...overrides,
     };
@@ -60,12 +73,23 @@ function toggleTag(tag: string) {
 }
 
 function clearTags() {
-    const options: any = { mergeQuery: { per_page: props.perPage || 10, page: 1 } };
+    const options: any = { mergeQuery: { per_page: props.perPage || 10, page: 1, ...(searchQuery.value ? { q: searchQuery.value } : {}) } };
     router.get(linksIndex.url(options), {}, { preserveState: true, preserveScroll: true });
 }
 
 function changePerPage(size: number) {
     const options: any = { mergeQuery: { ...buildQuery({ per_page: size, page: 1 }) } };
+    router.get(linksIndex.url(options), {}, { preserveState: true, preserveScroll: true });
+}
+
+function submitSearch() {
+    const options: any = { mergeQuery: { ...buildQuery({ page: 1 }) } };
+    router.get(linksIndex.url(options), {}, { preserveState: true, preserveScroll: true });
+}
+
+function clearSearch() {
+    searchQuery.value = '';
+    const options: any = { mergeQuery: { ...(activeTags.value.length ? { tags: activeTags.value } : {}), per_page: props.perPage || 10, page: 1 } };
     router.get(linksIndex.url(options), {}, { preserveState: true, preserveScroll: true });
 }
 
@@ -133,9 +157,9 @@ const thumbnailUrl = (thumbnail: string) => {
                         </div>
                     </div>
 
-                    <!-- Global Tags Filter (multi-select) + Per Page selector -->
-                    <div v-if="availableTags && availableTags.length" class="mt-4 flex flex-wrap items-center justify-between gap-4">
-                        <div class="flex flex-wrap items-center gap-2">
+                    <!-- Global Tags Filter (multi-select) + Search + Per Page selector -->
+                    <div class="mt-4 flex flex-wrap items-center justify-between gap-4">
+                        <div v-if="availableTags && availableTags.length" class="flex flex-wrap items-center gap-2">
                             <button
                                 type="button"
                                 class="rounded-full border px-3 py-1 text-xs font-medium transition-colors hover:bg-muted"
@@ -155,6 +179,23 @@ const thumbnailUrl = (thumbnail: string) => {
                                 {{ t }}
                             </button>
                         </div>
+
+                        <!-- Search input -->
+                        <div class="flex w-full items-center gap-2 sm:w-auto">
+                            <Input
+                                class="w-full sm:w-72"
+                                placeholder="Search links (title, URL, description, tag names)"
+                                :value="searchQuery"
+                                @input="(e:any)=> searchQuery = (e?.target?.value ?? '')"
+                                @keydown.enter.prevent="submitSearch"
+                            />
+                            <Button v-if="searchQuery" size="sm" variant="outline" @click="clearSearch">
+                                <X class="mr-1 h-3.5 w-3.5" />
+                                Clear
+                            </Button>
+                            <Button size="sm" @click="submitSearch">Search</Button>
+                        </div>
+
                         <!-- Per page dropdown in header -->
                         <div class="ml-auto flex items-center gap-2 text-xs">
                             <span class="text-muted-foreground">Show</span>

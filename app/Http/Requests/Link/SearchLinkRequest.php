@@ -22,6 +22,8 @@ class SearchLinkRequest extends FormRequest
     public function rules(): array
     {
         return [
+            // Free text query
+            'q' => ['nullable', 'string', 'max:255'],
             // Backward compatibility: legacy single tag param
             'tag' => ['nullable', 'string'],
             // New multi-tag support: tags[] as array of strings

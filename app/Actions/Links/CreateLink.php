@@ -20,6 +20,9 @@ class CreateLink
         $tags = $data['tags'] ?? [];
         $link->syncTags($tags);
 
+        // Push to Scout index (title / url / description / tags)
+        $link->searchable();
+
         LinkCreated::dispatch($link);
     }
 }

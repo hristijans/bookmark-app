@@ -44,6 +44,7 @@ class IndexLinkController extends Controller
             // Legacy single activeTag kept for backward compatibility with UI
             'activeTag' => (string) ($activeTags[0] ?? ''),
             'activeTags' => $activeTags,
+            'q' => (string) ($validated['q'] ?? ''),
             'perPage' => $perPage,
             'perPageOptions' => [10, 20, 50, 100],
         ]);
