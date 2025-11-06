@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('title', 255);
             $table->text('description')->nullable();
             $table->string('url', 255);
+            $table->string('thumbnail', 255)->nullable();
             $table->boolean('is_private')->default(true);
             $table->boolean('is_active')->default(true);
             $table->timestamps();

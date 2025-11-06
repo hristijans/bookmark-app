@@ -18,6 +18,7 @@ class Link extends Model
         'title',
         'description',
         'url',
+        'thumbnail',
         'is_private',
         'is_active',
     ];

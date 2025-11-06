@@ -14,13 +14,13 @@ class SearchLink
 
         // Normalize tags input: support legacy single 'tag' and new 'tags' array
         $tags = [];
-        if (!empty($data['tags']) && is_array($data['tags'])) {
+        if (! empty($data['tags']) && is_array($data['tags'])) {
             $tags = array_values(array_filter(array_map('strval', $data['tags'])));
-        } elseif (!empty($data['tag']) && is_string($data['tag'])) {
+        } elseif (! empty($data['tag']) && is_string($data['tag'])) {
             $tags = [(string) $data['tag']];
         }
 
-        if (!empty($tags)) {
+        if (! empty($tags)) {
             // ANY match (OR) per requirements
             $query->withAnyTags($tags);
         }

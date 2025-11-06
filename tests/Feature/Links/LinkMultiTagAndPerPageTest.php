@@ -12,16 +12,24 @@ it('filters by ANY of multiple tags via tags[] and exposes activeTags', function
 
     // Links with various tag combinations
     $phpOnly = Link::factory()->count(2)->create(['user_id' => $user->id]);
-    foreach ($phpOnly as $l) { $l->syncTags(['php']); }
+    foreach ($phpOnly as $l) {
+        $l->syncTags(['php']);
+    }
 
     $laravelOnly = Link::factory()->count(2)->create(['user_id' => $user->id]);
-    foreach ($laravelOnly as $l) { $l->syncTags(['laravel']); }
+    foreach ($laravelOnly as $l) {
+        $l->syncTags(['laravel']);
+    }
 
     $both = Link::factory()->count(1)->create(['user_id' => $user->id]);
-    foreach ($both as $l) { $l->syncTags(['php', 'laravel']); }
+    foreach ($both as $l) {
+        $l->syncTags(['php', 'laravel']);
+    }
 
     $neither = Link::factory()->count(2)->create(['user_id' => $user->id]);
-    foreach ($neither as $l) { $l->syncTags(['javascript']); }
+    foreach ($neither as $l) {
+        $l->syncTags(['javascript']);
+    }
 
     // Should match ANY (union): php OR laravel
     $this->actingAs($user)
@@ -38,10 +46,14 @@ it('accepts legacy single tag ?tag=php alongside tags[]', function () {
     $user = User::factory()->create();
 
     $phpLinks = Link::factory()->count(3)->create(['user_id' => $user->id]);
-    foreach ($phpLinks as $l) { $l->syncTags(['php']); }
+    foreach ($phpLinks as $l) {
+        $l->syncTags(['php']);
+    }
 
     $otherLinks = Link::factory()->count(2)->create(['user_id' => $user->id]);
-    foreach ($otherLinks as $l) { $l->syncTags(['go']); }
+    foreach ($otherLinks as $l) {
+        $l->syncTags(['go']);
+    }
 
     $this->actingAs($user)
         ->get(route('links.index', ['tag' => 'php']))
@@ -59,7 +71,9 @@ it('supports per_page options and preserves query in pagination links', function
 
     // Create 25 links tagged php to paginate
     $phpLinks = Link::factory()->count(25)->create(['user_id' => $user->id]);
-    foreach ($phpLinks as $l) { $l->syncTags(['php']); }
+    foreach ($phpLinks as $l) {
+        $l->syncTags(['php']);
+    }
 
     // Request 20 per page and filter by php
     $this->actingAs($user)

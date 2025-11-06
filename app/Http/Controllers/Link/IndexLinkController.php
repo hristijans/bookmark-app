@@ -27,14 +27,14 @@ class IndexLinkController extends Controller
 
         // Active tags: prefer tags[] but support legacy tag
         $activeTags = [];
-        if (!empty($validated['tags']) && is_array($validated['tags'])) {
+        if (! empty($validated['tags']) && is_array($validated['tags'])) {
             $activeTags = array_values(array_filter(array_map('strval', $validated['tags'])));
-        } elseif (!empty($validated['tag']) && is_string($validated['tag'])) {
+        } elseif (! empty($validated['tag']) && is_string($validated['tag'])) {
             $activeTags = [(string) $validated['tag']];
         }
 
         $perPage = isset($validated['per_page']) ? (int) $validated['per_page'] : 10;
-        if (!in_array($perPage, [10, 20, 50, 100], true)) {
+        if (! in_array($perPage, [10, 20, 50, 100], true)) {
             $perPage = 10;
         }
 

@@ -9,7 +9,7 @@ import { ref } from 'vue'
 
 const props = defineProps({
   tags: {
-    type: Array as () => Array<{ id: number; name: any; slug?: string }>,
+    type: Array as () => Array<{ id: number; name: any; slug?: string; links_count?: number }>,
     default: () => []
   }
 })
@@ -23,7 +23,7 @@ const editForm = useForm({
   name: ''
 })
 
-const startEdit = (tag: any) => {
+const onEdit = (tag: any) => {
   editingId.value = tag.id
   // Handle translatable name (Spatie Tags stores names per locale)
   editForm.name = (tag?.name?.en ?? tag?.name ?? '').toString()
@@ -128,7 +128,7 @@ const destroy = (tagId: number) => {
                       </Button>
                     </template>
                     <template v-else>
-                      <Button size="icon" variant="ghost" @click="startEdit(tag)">
+                      <Button size="icon" variant="ghost" @click="onEdit(tag)">
                         <Pencil class="h-4 w-4" />
                       </Button>
                       <Button size="icon" variant="ghost" @click="destroy(tag.id)">
@@ -139,7 +139,9 @@ const destroy = (tagId: number) => {
                 </div>
               </CardHeader>
               <CardContent>
-                <p class="text-xs text-muted-foreground">Slug: {{ tag.slug }}</p>
+                <p class="text-xs text-muted-foreground">
+                  {{ (tag.links_count ?? 0) }} {{ (tag.links_count ?? 0) === 1 ? 'Link' : 'Links' }} with this tag
+                </p>
               </CardContent>
             </Card>
           </div>
