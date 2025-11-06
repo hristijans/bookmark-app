@@ -4,8 +4,7 @@ namespace App\Listeners\Link;
 
 use App\Actions\Links\CreateThumbnail;
 use App\Events\Link\LinkCreated;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
+use App\Events\Link\LinkUpdated;
 use Illuminate\Support\Facades\Log;
 
 class CreateLinkThumbnail
@@ -13,7 +12,7 @@ class CreateLinkThumbnail
     /**
      * Create the event listener.
      */
-    public function __construct()
+    public function __construct(public CreateThumbnail $createThumbnail)
     {
         //
     }
@@ -21,10 +20,10 @@ class CreateLinkThumbnail
     /**
      * Handle the event.
      */
-    public function handle(LinkCreated $event, CreateThumbnail $createThumbnail): void
+    public function handle(LinkCreated|LinkUpdated $event): void
     {
         try {
-            $createThumbnail->execute($event->link);
+            $this->createThumbnail->execute($event->link);
         } catch (\Throwable $th) {
             Log::error('Error while creating link thumbnail: ', [
                 'exception' => $th->getMessage(),

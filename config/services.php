@@ -35,4 +35,19 @@ return [
         ],
     ],
 
+    // Optional link thumbnail generation settings
+    'link_thumbnail' => [
+        // Template for a screenshot service that returns an image for a target URL.
+        // Example (Browserless or similar service):
+        // 'https://screenshot.example.com/api?url={url}&fullPage=false&width=1280&height=800'
+        'screenshot_url_template' => env('LINK_THUMBNAIL_SCREENSHOT_URL_TEMPLATE', null),
+
+        // Timeouts (seconds)
+        'timeout' => env('LINK_THUMBNAIL_TIMEOUT', 10),
+        'connect_timeout' => env('LINK_THUMBNAIL_CONNECT_TIMEOUT', 5),
+
+        // Custom User Agent for fetching pages/images
+        'user_agent' => env('LINK_THUMBNAIL_USER_AGENT', null),
+    ],
+
 ];

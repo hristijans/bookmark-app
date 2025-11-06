@@ -98,6 +98,10 @@ const tagLabel = (tag: any): string => {
     }
     return typeof name === 'string' ? name : '';
 };
+
+const thumbnailUrl = (thumbnail: string) => {
+    return '/storage/' + thumbnail;
+}
 </script>
 
 <template>
@@ -185,7 +189,7 @@ const tagLabel = (tag: any): string => {
                             >
                                 <img
                                     v-if="link.thumbnail"
-                                    :src="link.thumbnail"
+                                    :src="thumbnailUrl(link.thumbnail)"
                                     :alt="link.title"
                                     class="h-full w-full object-cover transition-transform group-hover:scale-105"
                                 />
