@@ -5,6 +5,7 @@ namespace App\Console\Commands\Links;
 use App\Models\Link;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
+use Laravel\Scout\EngineManager;
 
 class SyncSearchIndex extends Command
 {
@@ -21,7 +22,8 @@ class SyncSearchIndex extends Command
     public function handle(): int
     {
         $driver = config('scout.driver');
-        $indexName = (string) $this->option('index');
+
+        $indexName = (string) $this->option('index') ?? 'links';
 
         if ($driver !== 'meilisearch') {
             $this->warn("SCOUT_DRIVER is '{$driver}'. Skipping Meilisearch-specific configuration. Running a generic scout:import instead.");
@@ -33,7 +35,7 @@ class SyncSearchIndex extends Command
         }
 
         /** @var \Meilisearch\Client $client */
-        $client = app('scout.meilisearch.client');
+        $client = app(EngineManager::class)->engine();
 
         if ($this->option('fresh')) {
             try {
