@@ -23,9 +23,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 const props = defineProps({
     links: Object,
     availableTags: Array,
-    // legacy single tag for backward compatibility
     activeTag: { type: String, default: '' },
-    // new multi-tag + pagination props
     activeTags: { type: Array as () => string[], default: () => [] },
     q: { type: String, default: '' },
     perPage: { type: Number, default: 10 },
@@ -35,7 +33,9 @@ const props = defineProps({
 const activeTag = computed(() => props.activeTag || '');
 const activeTags = computed<string[]>(() => props.activeTags ?? []);
 const searchQuery = ref<string>(props.q || '');
+let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
+// Watch for external changes to q (e.g., from URL)
 watch(
     () => props.q,
     (val) => {
@@ -44,6 +44,17 @@ watch(
         }
     }
 );
+
+// Debounced watcher for searchQuery changes
+watch(searchQuery, (newValue) => {
+    if (debounceTimer) {
+        clearTimeout(debounceTimer);
+    }
+
+    debounceTimer = setTimeout(() => {
+        performSearch();
+    }, 500); // 500ms delay - adjust as needed
+});
 
 function buildQuery(overrides: Record<string, any> = {}) {
     const query: Record<string, any> = {
@@ -55,41 +66,86 @@ function buildQuery(overrides: Record<string, any> = {}) {
     return query;
 }
 
-function applyTags(tags: string[]) {
-    // Reset to page 1 when filters change
-    const options: any = { mergeQuery: { ...buildQuery({ tags, page: 1 }) } };
-    router.get(linksIndex.url(options), {}, { preserveState: true, preserveScroll: true });
-}
+
 
 function toggleTag(tag: string) {
+    // Clear the debounce timer to prevent pending searches
+    if (debounceTimer) {
+        clearTimeout(debounceTimer);
+    }
+
     const label = String(tag);
     const set = new Set(activeTags.value);
+
     if (set.has(label)) {
         set.delete(label);
     } else {
         set.add(label);
     }
-    applyTags(Array.from(set));
+
+    // Build query with or without tags
+    const tags = Array.from(set);
+    const query: Record<string, any> = {
+        per_page: props.perPage || 10,
+        page: 1,
+        ...(searchQuery.value ? { q: searchQuery.value } : {}),
+        ...(tags.length ? { tags } : {})
+    };
+
+    router.get(linksIndex.url(), query, { preserveState: true, preserveScroll: true });
 }
 
 function clearTags() {
-    const options: any = { mergeQuery: { per_page: props.perPage || 10, page: 1, ...(searchQuery.value ? { q: searchQuery.value } : {}) } };
-    router.get(linksIndex.url(options), {}, { preserveState: true, preserveScroll: true });
+    // Clear the debounce timer to prevent pending searches
+    if (debounceTimer) {
+        clearTimeout(debounceTimer);
+    }
+
+    const query: Record<string, any> = {
+        per_page: props.perPage || 10,
+        page: 1,
+        ...(searchQuery.value ? { q: searchQuery.value } : {})
+    };
+
+    router.get(linksIndex.url(), query, { preserveState: true, preserveScroll: true });
 }
+
 
 function changePerPage(size: number) {
     const options: any = { mergeQuery: { ...buildQuery({ per_page: size, page: 1 }) } };
     router.get(linksIndex.url(options), {}, { preserveState: true, preserveScroll: true });
 }
 
-function submitSearch() {
+function performSearch() {
     const options: any = { mergeQuery: { ...buildQuery({ page: 1 }) } };
     router.get(linksIndex.url(options), {}, { preserveState: true, preserveScroll: true });
 }
 
+function submitSearch() {
+    if (debounceTimer) {
+        clearTimeout(debounceTimer);
+    }
+    performSearch();
+}
+
 function clearSearch() {
-    searchQuery.value = '';
-    const options: any = { mergeQuery: { ...(activeTags.value.length ? { tags: activeTags.value } : {}), per_page: props.perPage || 10, page: 1 } };
+    if (debounceTimer) {
+        clearTimeout(debounceTimer);
+    }
+
+    const query: Record<string, any> = {
+        // ...(activeTags.value.length ? { tags: activeTags.value } : {}),
+        per_page: props.perPage || 10,
+        page: 1
+    };
+
+    // const options: any = {
+    //     mergeQuery: query,
+    //     replace: true  // Use replace to update URL without adding to history
+    // };
+
+    const options = {}
+
     router.get(linksIndex.url(options), {}, { preserveState: true, preserveScroll: true });
 }
 
@@ -112,7 +168,6 @@ const getDomain = (url) => {
     }
 };
 
-// Spatie\Tags stores names per locale; extract a sensible string label
 const tagLabel = (tag: any): string => {
     const name = tag?.name;
     if (name && typeof name === 'object') {
@@ -180,22 +235,6 @@ const thumbnailUrl = (thumbnail: string) => {
                             </button>
                         </div>
 
-                        <!-- Search input -->
-                        <div class="flex w-full items-center gap-2 sm:w-auto">
-                            <Input
-                                class="w-full sm:w-72"
-                                placeholder="Search links (title, URL, description, tag names)"
-                                :value="searchQuery"
-                                @input="(e:any)=> searchQuery = (e?.target?.value ?? '')"
-                                @keydown.enter.prevent="submitSearch"
-                            />
-                            <Button v-if="searchQuery" size="sm" variant="outline" @click="clearSearch">
-                                <X class="mr-1 h-3.5 w-3.5" />
-                                Clear
-                            </Button>
-                            <Button size="sm" @click="submitSearch">Search</Button>
-                        </div>
-
                         <!-- Per page dropdown in header -->
                         <div class="ml-auto flex items-center gap-2 text-xs">
                             <span class="text-muted-foreground">Show</span>
@@ -208,6 +247,21 @@ const thumbnailUrl = (thumbnail: string) => {
                             </select>
                             <span class="text-muted-foreground">per page</span>
                         </div>
+                    </div>
+
+                    <!-- Search input -->
+                    <div class="flex w-full items-center gap-2 sm:w-auto my-4">
+                        <Input
+                            class="w-full sm:w-72"
+                            placeholder="Search links (title, URL, description, tag names)"
+                            v-model="searchQuery"
+                            @keydown.enter.prevent="submitSearch"
+                        />
+                        <Button size="sm" @click="submitSearch">Search</Button>
+                        <Button v-if="searchQuery" size="sm" variant="outline" @click="clearSearch">
+                            <X class="mr-1 h-3.5 w-3.5" />
+                            Clear
+                        </Button>
                     </div>
                 </div>
 
@@ -298,8 +352,8 @@ const thumbnailUrl = (thumbnail: string) => {
                                 >
                                     <Link2 class="h-3 w-3" />
                                     <span class="truncate">{{
-                                        getDomain(link.url)
-                                    }}</span>
+                                            getDomain(link.url)
+                                        }}</span>
                                 </div>
                             </CardContent>
                         </Card>

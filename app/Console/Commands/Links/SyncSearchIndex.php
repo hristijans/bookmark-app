@@ -21,18 +21,7 @@ class SyncSearchIndex extends Command
 
     public function handle(): int
     {
-        $driver = config('scout.driver');
-
         $indexName = (string) $this->option('index') ?? 'links';
-
-        if ($driver !== 'meilisearch') {
-            $this->warn("SCOUT_DRIVER is '{$driver}'. Skipping Meilisearch-specific configuration. Running a generic scout:import instead.");
-
-            Artisan::call('scout:import', ['model' => Link::class]);
-            $this->info(trim(Artisan::output()));
-
-            return self::SUCCESS;
-        }
 
         /** @var \Meilisearch\Client $client */
         $client = app(EngineManager::class)->engine();
@@ -59,7 +48,23 @@ class SyncSearchIndex extends Command
             'searchableAttributes' => ['title', 'url', 'description', 'tags'],
             'filterableAttributes' => ['user_id', 'tags', 'created_at'],
             'sortableAttributes' => ['created_at'],
+            'typoTolerance' => [
+                'enabled' => true,
+                'minWordSizeForTypos' => [
+                    'oneTypo' => 5,
+                    'twoTypos' => 9,
+                ],
+            ],
+            'rankingRules' => [
+                'words',
+                'typo',
+                'proximity',
+                'attribute',
+                'sort',
+                'exactness',
+            ],
         ]);
+
         $this->info('Updated index settings.');
 
         // Import all Links into the index. Use the official Laravel command for reliability.

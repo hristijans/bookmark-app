@@ -10,10 +10,8 @@ class SearchLink
 {
     public function execute(array $data): LengthAwarePaginator
     {
-        $perPage = 10;
-        if (isset($data['per_page']) && in_array((int) $data['per_page'], [10, 20, 50, 100], true)) {
-            $perPage = (int) $data['per_page'];
-        }
+
+        $perPage = Arr::get($data, 'per_page', 10);
 
         // Normalize tags input: support legacy single 'tag' and new 'tags' array
         $tags = [];

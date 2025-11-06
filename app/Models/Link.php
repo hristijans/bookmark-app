@@ -83,4 +83,48 @@ class Link extends Model
 
         return true;
     }
+
+    public function searchableOptions(): array
+    {
+        return [
+            'filterableAttributes' => ['status', 'category_id', 'created_at'],
+            'sortableAttributes' => ['created_at', 'updated_at', 'title'],
+            'rankingRules' => [
+                'words',
+                'typo',
+                'proximity',
+                'attribute',
+                'sort',
+                'exactness',
+                'created_at:desc',
+            ],
+            'searchableAttributes' => [
+                'title',
+                'description',
+                'tags',
+            ],
+            'displayedAttributes' => ['*'],
+            'stopWords' => ['the', 'a', 'an'],
+            'synonyms' => [
+                'football' => ['soccer'],
+                'fixture' => ['match', 'game'],
+            ],
+            'distinctAttribute' => 'product_id',
+            'typoTolerance' => [
+                'enabled' => true,
+                'minWordSizeForTypos' => [
+                    'oneTypo' => 5,
+                    'twoTypos' => 9,
+                ],
+                'disableOnWords' => [],
+                'disableOnAttributes' => [],
+            ],
+            'faceting' => [
+                'maxValuesPerFacet' => 100,
+            ],
+            'pagination' => [
+                'maxTotalHits' => 1000,
+            ],
+        ];
+    }
 }
