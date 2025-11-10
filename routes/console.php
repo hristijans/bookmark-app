@@ -10,3 +10,6 @@ Artisan::command('inspire', function () {
 
 // Nightly sync of the links search index and ensure index settings are up to date
 Schedule::command('links:scout-sync')->dailyAt('02:20');
+
+// Fetch user feeds every 12 hours
+Schedule::command('feeds:sync')->twiceDaily(1, 13)->withoutOverlapping();
