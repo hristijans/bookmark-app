@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Link;
 use App\Actions\Links\SearchLink;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Link\SearchLinkRequest;
+use App\Models\Tag;
 use Inertia\Inertia;
-use Spatie\Tags\Tag;
 
 class IndexLinkController extends Controller
 {
@@ -15,15 +15,23 @@ class IndexLinkController extends Controller
         $validated = $request->validated();
         $links = $searchLink->execute($validated);
 
-        $tagNames = Tag::query()->get()->pluck('name')->map(function ($name) {
-            if (is_array($name)) {
-                $first = reset($name);
+        $tagNames = Tag::query()
+            ->when(auth()->check(), fn ($q) => $q->where('user_id', auth()->id()))
+            ->get()
+            ->pluck('name')
+            ->map(function ($name) {
+                if (is_array($name)) {
+                    $first = reset($name);
 
-                return is_string($first) ? $first : '';
-            }
+                    return is_string($first) ? $first : '';
+                }
 
-            return (string) $name;
-        })->filter()->sort()->values()->all();
+                return (string) $name;
+            })
+            ->filter()
+            ->sort()
+            ->values()
+            ->all();
 
         // Active tags: prefer tags[] but support legacy tag
         $activeTags = [];

@@ -3,9 +3,9 @@
 namespace App\Actions\Tags;
 
 use App\Models\Link;
+use App\Models\Tag;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
-use Spatie\Tags\Tag;
 
 class SearchTag
 {
@@ -22,6 +22,9 @@ class SearchTag
             ->selectRaw('count(*)');
 
         return Tag::query()
+            ->when(auth()->check(), function ($q) {
+                $q->where('user_id', auth()->id());
+            })
             ->orderBy('name')
             ->select(['id', 'name', 'slug'])
             ->selectSub($linksCountSub, 'links_count')

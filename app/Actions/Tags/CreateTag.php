@@ -2,7 +2,7 @@
 
 namespace App\Actions\Tags;
 
-use Spatie\Tags\Tag;
+use App\Models\Tag;
 
 class CreateTag
 {
