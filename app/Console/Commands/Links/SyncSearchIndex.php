@@ -4,7 +4,6 @@ namespace App\Console\Commands\Links;
 
 use App\Models\Link;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Artisan;
 use Laravel\Scout\EngineManager;
 
 class SyncSearchIndex extends Command

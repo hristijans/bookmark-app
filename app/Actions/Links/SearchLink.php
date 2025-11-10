@@ -41,8 +41,10 @@ class SearchLink
                         $name = $tag->name ?? null;
                         if (is_array($name)) {
                             $first = reset($name);
+
                             return is_string($first) ? $first : '';
                         }
+
                         return (string) $name;
                     })->filter()->values()->all();
 

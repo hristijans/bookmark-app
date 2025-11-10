@@ -12,7 +12,7 @@ use Spatie\Tags\HasTags;
 class Link extends Model
 {
     /** @use HasFactory<\Database\Factories\LinkFactory> */
-    use HasFactory, HasTags, SoftDeletes, Searchable;
+    use HasFactory, HasTags, Searchable, SoftDeletes;
 
     protected $fillable = [
         'user_id',
